@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
@@ -14,7 +13,7 @@ const Navbar = () => {
       <div className="flex items-end">
         <Image src="/rabble.svg" alt="Rabble" width={82.8} height={21.6} />
         <div className="ml-auto flex items-center ">
-          <ConnectButton accountStatus={"avatar"} chainStatus={"icon"} />
+          <w3m-button />
         </div>
       </div>
       <hr className="bg-black my-2" />

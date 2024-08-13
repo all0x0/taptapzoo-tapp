@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 
-import { counterAbi } from "@/constants/abi";
+import { tokenAbi } from "@/constants/abi";
 import { counterAddress } from "@/constants";
 
 export function WriteContract() {
@@ -19,8 +19,8 @@ export function WriteContract() {
     console.log(tokenId);
     writeContract({
       address: counterAddress,
-      abi: counterAbi,
-      functionName: "setNumber",
+      abi: tokenAbi,
+      functionName: "mint",
       args: [BigInt(tokenId)],
     });
   }

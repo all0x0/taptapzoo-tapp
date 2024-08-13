@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
-import { Outfit, Be_Vietnam_Pro } from "next/font/google";
-import "@rainbow-me/rainbowkit/styles.css";
-import "./globals.css";
-import Web3Provider from "@/providers/Web3Provider";
 import Layout from "@/providers/Layout";
 import { TelegramProvider } from "@/providers/TelegramProvider";
+import AppKitProvider from "@/providers/Web3Provider";
+import type { Metadata } from "next";
+import { Be_Vietnam_Pro, Outfit } from "next/font/google";
+import { headers } from "next/headers";
+import { cookieToInitialState } from "wagmi";
+import "./globals.css";
+import { config } from "@/utils/config";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const beVietnamPro = Be_Vietnam_Pro({
@@ -23,14 +25,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const initialState = cookieToInitialState(config, headers().get("cookie"));
+
   return (
     <html lang="en" className={`${outfit.variable} ${beVietnamPro.variable}`}>
       <body className={beVietnamPro.className}>
-        <Web3Provider>
+        <AppKitProvider initialState={initialState}>
           <TelegramProvider>
             <Layout>{children}</Layout>
           </TelegramProvider>
-        </Web3Provider>
+        </AppKitProvider>
       </body>
     </html>
   );

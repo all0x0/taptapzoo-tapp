@@ -1,6 +1,6 @@
 "use client";
 import { useReadContract } from "wagmi";
-import { counterAbi } from "@/constants/abi";
+import { tokenAbi } from "@/constants/abi";
 import { counterAddress } from "@/constants";
 
 export function ReadContract() {
@@ -10,9 +10,9 @@ export function ReadContract() {
     isLoading,
     error,
   } = useReadContract({
-    abi: counterAbi,
+    abi: tokenAbi,
     address: counterAddress,
-    functionName: "number",
+    functionName: "totalSupply",
   });
 
   console.log(counter, status, isLoading, error);
