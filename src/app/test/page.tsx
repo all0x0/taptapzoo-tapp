@@ -59,6 +59,12 @@ export default function Home() {
     }, 2000);
   });
 
+  const handleViewport = async () => {
+    if (!viewport?.isExpanded) {
+      viewport?.expand();
+    }
+  };
+
   useEffect(() => {
     if (!viewport?.isExpanded) {
       viewport?.expand();
@@ -100,6 +106,9 @@ export default function Home() {
           <div className="flex gap-2 mt-2">
             <Button variant={"rabble"} size={"half"} onClick={handleMainBtn}>
               Toggle Main Button
+            </Button>
+            <Button variant={"tertiary"} size={"half"} onClick={handleViewport}>
+              Expand Webview
             </Button>
           </div>
         </div>
