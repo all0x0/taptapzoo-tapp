@@ -19,6 +19,8 @@ createWeb3Modal({
   metadata,
   wagmiConfig: config,
   projectId,
+  enableOnramp: true,
+  enableSwaps: true, // Notes: Only available for email login
   enableAnalytics: true, // Optional - defaults to your Cloud configuration
 });
 
