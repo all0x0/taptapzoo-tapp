@@ -1,39 +1,50 @@
 "use client";
 
-import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { SDKProvider, useLaunchParams } from "@telegram-apps/sdk-react";
-
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorPage } from "@/components/ErrorPage";
-import { useTelegramMock } from "@/hooks/useTelegramMock";
 import { useDidMount } from "@/hooks/useDidMount";
+import { useTelegramMock } from "@/hooks/useTelegramMock";
+import {
+  bindMiniAppCSSVars,
+  bindThemeParamsCSSVars,
+  bindViewportCSSVars,
+  SDKProvider,
+  useLaunchParams,
+  useMiniApp,
+  useThemeParams,
+  useViewport,
+} from "@telegram-apps/sdk-react";
+import { AppRoot } from "@telegram-apps/telegram-ui";
 import Image from "next/image";
+import { type PropsWithChildren, useEffect } from "react";
 
-// function App(props: PropsWithChildren) {
-//   const lp = useLaunchParams();
-//   const miniApp = useMiniApp();
-//   const themeParams = useThemeParams();
-//   const viewport = useViewport();
+function App(props: PropsWithChildren) {
+  const lp = useLaunchParams();
+  const miniApp = useMiniApp();
+  const themeParams = useThemeParams();
+  const viewport = useViewport();
 
-//   useEffect(() => {
-//     return bindMiniAppCSSVars(miniApp, themeParams);
-//   }, [miniApp, themeParams]);
+  useEffect(() => {
+    return bindMiniAppCSSVars(miniApp, themeParams);
+  }, [miniApp, themeParams]);
 
-//   useEffect(() => {
-//     return bindThemeParamsCSSVars(themeParams);
-//   }, [themeParams]);
+  useEffect(() => {
+    return bindThemeParamsCSSVars(themeParams);
+  }, [themeParams]);
 
-//   useEffect(() => {
-//     return viewport && bindViewportCSSVars(viewport);
-//   }, [viewport]);
+  useEffect(() => {
+    return viewport && bindViewportCSSVars(viewport);
+  }, [viewport]);
 
-//   return (
-//     <
-//     >
-//       {props.children}
-//     </>
-//   );
-// }
+  return (
+    <AppRoot
+      appearance={miniApp.isDark ? "dark" : "light"}
+      platform={["macos", "ios"].includes(lp.platform) ? "ios" : "base"}
+    >
+      {props.children}
+    </AppRoot>
+  );
+}
 
 function RootInner({ children }: PropsWithChildren) {
   // Mock Telegram environment in development mode if needed.
@@ -53,7 +64,7 @@ function RootInner({ children }: PropsWithChildren) {
 
   return (
     <SDKProvider acceptCustomStyles debug={debug}>
-      {children}
+      <App>{children}</App>
     </SDKProvider>
   );
 }

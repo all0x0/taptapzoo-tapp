@@ -1,12 +1,13 @@
 import Layout from "@/providers/Layout";
 import { TelegramProvider } from "@/providers/TelegramProvider";
 import AppKitProvider from "@/providers/Web3Provider";
+import { config } from "@/utils/config";
+import "@telegram-apps/telegram-ui/dist/styles.css";
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Outfit } from "next/font/google";
 import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
 import "./globals.css";
-import { config } from "@/utils/config";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const beVietnamPro = Be_Vietnam_Pro({
