@@ -11,7 +11,6 @@ const Navbar = () => {
   return (
     <nav className="mx-3 my-4">
       <div className="flex items-end">
-        <Image src="/rabble.svg" alt="Rabble" width={82.8} height={21.6} />
         <div className="ml-auto flex items-center ">
           <w3m-button />
         </div>

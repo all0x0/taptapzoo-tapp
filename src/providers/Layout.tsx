@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import BottomBar from "@/components/shared/BottomBar";
 import Navbar from "@/components/shared/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -7,7 +7,8 @@ import {
   useClosingBehavior,
   useViewport,
 } from "@telegram-apps/sdk-react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const bb = useBackButton();
@@ -38,7 +39,8 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <main className="bg-background">
       <Navbar />
-      <main className=" mx-3 my-4 ">{children}</main>
+      <main>{children}</main>
+      <BottomBar />
       <Toaster richColors />
     </main>
   );

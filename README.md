@@ -130,7 +130,6 @@ The project follows a standard directory structure for a Next.js application. He
 │   ├── arrow.svg
 │   ├── butterfly.svg
 │   ├── loader.svg
-│   └── rabble.svg
 ├── src
 │   ├── app
 │   │   ├── contract
