@@ -1,21 +1,37 @@
 "use client";
-import { useReadContract } from "wagmi";
+
+import { tokenAddress } from "@/constants";
 import { tokenAbi } from "@/constants/abi";
-import { counterAddress } from "@/constants";
+import { RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { useAccount, useReadContract } from "wagmi";
+import { formatEther } from "viem";
 
 export function ReadContract() {
+  const { address } = useAccount();
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const {
-    data: counter,
+    data: balance,
     status,
     isLoading,
     error,
+    refetch,
   } = useReadContract({
     abi: tokenAbi,
-    address: counterAddress,
-    functionName: "totalSupply",
+    address: tokenAddress,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
   });
 
-  console.log(counter, status, isLoading, error);
+  const handleRefresh = () => {
+    setRefreshKey((prevKey) => prevKey + 1);
+    refetch();
+  };
+
+  const formattedBalance = balance
+    ? Number(formatEther(balance)).toFixed(0)
+    : "0";
 
   return (
     <div className="text-left my-8">
@@ -24,9 +40,18 @@ export function ReadContract() {
       ) : error ? (
         <div className="text-red-500">Error</div>
       ) : (
-        <div className="text-2xl">
-          Current Number:{" "}
-          <span className="text-rabble">{counter?.toString()}</span>
+        <div className="text-2xl flex items-center">
+          <span>
+            Current Balance:{" "}
+            <span className="text-rabble">{formattedBalance} TTZ</span>
+          </span>
+          <button
+            onClick={handleRefresh}
+            className="ml-4 p-2 rounded-full hover:bg-gray-200"
+            aria-label="Refresh balance"
+          >
+            <RefreshCw size={24} />
+          </button>
         </div>
       )}
     </div>

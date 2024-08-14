@@ -1,13 +1,13 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import * as React from "react";
 import { useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
+import { tokenAddress } from "@/constants";
 import { tokenAbi } from "@/constants/abi";
-import { counterAddress } from "@/constants";
 
 export function WriteContract() {
   const { data: hash, isPending, writeContract } = useWriteContract();
@@ -18,7 +18,7 @@ export function WriteContract() {
     const tokenId = formData.get("value") as string;
     console.log(tokenId);
     writeContract({
-      address: counterAddress,
+      address: tokenAddress,
       abi: tokenAbi,
       functionName: "mint",
       args: [BigInt(tokenId)],
