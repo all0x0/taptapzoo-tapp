@@ -3,7 +3,7 @@ import { NumberAnimation } from "@/components/NumberAnimation";
 import TextUp from "@/components/TextUp";
 import { AppRoot, Button, Card } from "@telegram-apps/telegram-ui";
 import { ZapIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const Home = () => {
   const [count, setCount] = useState(0);
@@ -13,12 +13,11 @@ const Home = () => {
   const [lastBoostTime, setLastBoostTime] = useState<number>(0);
   const maxEnergy = 1000;
   const cooldownDuration = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
-  const [animate, setAnimate] = useState(false);
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
-  const animateTextUp = () => {
-    setAnimate(true);
-    setTimeout(() => setAnimate(false), 400);
-  };
+  const animateTextUp = useCallback(() => {
+    setAnimationTrigger((prev) => prev + 1);
+  }, []);
 
   const handleClick = () => {
     if (energy > 0) {
@@ -108,12 +107,12 @@ const Home = () => {
               className="rounded-full w-full h-full object-cover"
             />
             <div className="absolute -top-8 left-0 flex justify-center items-center w-full h-full">
-              <TextUp animate={animate} points={multiplier} />
+              <TextUp animationTrigger={animationTrigger} points={multiplier} />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center pt-2">
         <p className="text-sm">Current multiplier: x{multiplier}</p>
         <Button
           stretched
