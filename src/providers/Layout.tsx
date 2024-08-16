@@ -40,7 +40,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     <main className="bg-background">
       <Navbar />
       <main>{children}</main>
-      <BottomBar />
+      {/* <BottomBar /> */}
       <Toaster richColors />
     </main>
   );
