@@ -1,7 +1,13 @@
 "use client";
 import { NumberAnimation } from "@/components/NumberAnimation";
 import TextUp from "@/components/TextUp";
-import { useMainButton, useUtils } from "@telegram-apps/sdk-react";
+import {
+  useInitData,
+  useLaunchParams,
+  useMainButton,
+  usePopup,
+  useUtils,
+} from "@telegram-apps/sdk-react";
 import {
   AppRoot,
   Badge,
@@ -11,7 +17,13 @@ import {
 } from "@telegram-apps/telegram-ui";
 import { ZapIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  addOrUpdateUser,
+  claimDailyReward,
+  getUserInfo,
+  setPoints,
+} from "./actions/userActions";
 
 const Home = () => {
   const [count, setCount] = useState(0);
@@ -24,7 +36,13 @@ const Home = () => {
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const router = useRouter();
   const mainBtn = useMainButton();
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const initData = useInitData();
+  const { initDataRaw } = useLaunchParams();
+  const [nextClaimAt, setNextClaimAt] = useState("");
+  const popUp = usePopup();
   const utils = useUtils();
+  const user = useMemo(() => initData?.user, [initData]);
 
   const handleShare = async () => {
     utils.shareURL(
@@ -82,8 +100,77 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if (userInfo) {
+      setCount(+userInfo.points);
+      setMultiplier(+userInfo.multiplier);
+      setMultiplierCost(userInfo.multiplierCost);
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
     mainBtn.hide();
   }, []);
+
+  useEffect(() => {
+    const handleAddOrUpdateUser = async () => {
+      if (user) {
+        const result = await addOrUpdateUser(user.id, user.username || "");
+      }
+    };
+
+    const handleGetUserInfo = async () => {
+      if (user) {
+        const info = await getUserInfo(user.id);
+        console.log("🚀 ~ handleGetUserInfo ~ info:", info);
+        setUserInfo(info);
+        setNextClaimAt(info.nextClaimAt);
+      }
+    };
+
+    handleAddOrUpdateUser();
+    handleGetUserInfo();
+  }, [user]);
+
+  useEffect(() => {
+    const updatePoints = async () => {
+      if (user) {
+        await setPoints(user.id, {
+          points: count,
+          multiplier,
+          multiplierCost,
+          energy,
+        });
+      }
+    };
+
+    const intervalId = setInterval(updatePoints, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [user, count, energy]);
+
+  const handlePopUp = async () => {
+    const response = await popUp.open({
+      title: " Rabble",
+      message: "Link will lead to website",
+      buttons: [
+        { id: "link", type: "default", text: "Open rabble.pro" },
+        { type: "cancel" },
+      ],
+    });
+    if (response === "link") {
+      utils.openLink("https://rabble.pro");
+    }
+  };
+  const handleClaimReward = async () => {
+    if (nextClaimAt && new Date(nextClaimAt) > new Date()) {
+      handlePopUp();
+    } else {
+      if (user) {
+        const result = await claimDailyReward(user.id);
+        setNextClaimAt(result.nextClaimAt);
+      }
+    }
+  };
 
   return (
     <AppRoot className="h-screen font-sans flex flex-col mx-3 my-4">
@@ -100,7 +187,9 @@ const Home = () => {
                 <Badge type={"number"} className="text-sm">
                   Explorer
                 </Badge>
-                <Title className="text-lg">John Lin</Title>
+                <Title className="text-lg">
+                  {userInfo ? userInfo.username : "John Lin"}
+                </Title>
                 {/* <Subheadline></Subheadline> */}
               </div>
             </div>
@@ -114,13 +203,27 @@ const Home = () => {
         </div>
       </Card>
       <div className="grid grid-cols-3 gap-2 mb-4">
-        <Card className="p-2 rounded-lg text-center">
+        <Card
+          className="p-2 rounded-lg text-center"
+          onClick={handleClaimReward}
+        >
           <img
             src="/actions/calendar.webp"
             alt="Daily reward"
             className="mx-auto"
           />
-          <p className="text-xs">Daily reward</p>
+          {nextClaimAt && new Date(nextClaimAt) > new Date() ? (
+            <p className="text-xs">
+              Next claim at:{" "}
+              {new Date(nextClaimAt).toLocaleString("en-US", {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+              })}
+            </p>
+          ) : (
+            <p className="text-xs">Daily reward</p>
+          )}
         </Card>
         <Card className="p-2 rounded-lg text-center">
           <img src="/actions/coins.webp" alt="Earn" className="mx-auto" />
