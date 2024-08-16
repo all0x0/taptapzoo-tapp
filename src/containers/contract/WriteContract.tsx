@@ -58,7 +58,7 @@ export function WriteContract() {
         <Button
           disabled={isPending || isConfirming}
           type="submit"
-          variant={"rabble"}
+          variant={"default"}
           size={"one-third"}
         >
           {isPending ? "Confirming..." : "Set Number"}

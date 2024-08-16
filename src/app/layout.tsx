@@ -17,8 +17,8 @@ const beVietnamPro = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "Create ETH Mini App",
-  description: "Template for creating a Mini App on Ethereum",
+  title: "TapTapZoo Mini Game",
+  description: "A fun mini game where you can tap and collect rewards",
 };
 
 export default function RootLayout({

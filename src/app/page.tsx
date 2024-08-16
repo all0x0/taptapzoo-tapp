@@ -1,17 +1,17 @@
 "use client";
 import { NumberAnimation } from "@/components/NumberAnimation";
 import TextUp from "@/components/TextUp";
+import { useMainButton, useUtils } from "@telegram-apps/sdk-react";
 import {
   AppRoot,
   Badge,
   Button,
   Card,
-  Subheadline,
   Title,
 } from "@telegram-apps/telegram-ui";
 import { ZapIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 const Home = () => {
   const [count, setCount] = useState(0);
@@ -23,6 +23,15 @@ const Home = () => {
   const cooldownDuration = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const router = useRouter();
+  const mainBtn = useMainButton();
+  const utils = useUtils();
+
+  const handleShare = async () => {
+    utils.shareURL(
+      "https://t.me/TapTapZooBot",
+      "Join the fun in Tap Tap Zoo Game!"
+    );
+  };
 
   const animateTextUp = useCallback(() => {
     setAnimationTrigger((prev) => prev + 1);
@@ -72,6 +81,10 @@ const Home = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    mainBtn.hide();
+  }, []);
+
   return (
     <AppRoot className="h-screen font-sans flex flex-col mx-3 my-4">
       <Card className="rounded-lg p-2 mb-2">
@@ -101,16 +114,22 @@ const Home = () => {
         </div>
       </Card>
       <div className="grid grid-cols-3 gap-2 mb-4">
-        {[
-          { name: "Daily reward", img: "/actions/calendar.webp" },
-          { name: "Earn", img: "/actions/coins.webp" },
-          { name: "Share", img: "/actions/announce.webp" },
-        ].map((item, index) => (
-          <Card key={index} className="p-2 rounded-lg text-center">
-            <img src={item.img} alt={item.name} className="mx-auto" />
-            <p className="text-xs">{item.name}</p>
-          </Card>
-        ))}
+        <Card className="p-2 rounded-lg text-center">
+          <img
+            src="/actions/calendar.webp"
+            alt="Daily reward"
+            className="mx-auto"
+          />
+          <p className="text-xs">Daily reward</p>
+        </Card>
+        <Card className="p-2 rounded-lg text-center">
+          <img src="/actions/coins.webp" alt="Earn" className="mx-auto" />
+          <p className="text-xs">Earn</p>
+        </Card>
+        <Card className="p-2 rounded-lg text-center" onClick={handleShare}>
+          <img src="/actions/announce.webp" alt="Share" className="mx-auto" />
+          <p className="text-xs">Share</p>
+        </Card>
       </div>
       <div className="text-center mb-4">
         <NumberAnimation value={count} />

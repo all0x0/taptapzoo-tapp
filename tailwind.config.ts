@@ -1,12 +1,12 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -19,7 +19,6 @@ const config = {
     },
     extend: {
       colors: {
-        rabble: "#08F7AF",
         back: "#E7E7E7",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -32,7 +31,7 @@ const config = {
         // var(--tg-theme-link-color)
         // var(--tg-theme-button-color)
         // var(--tg-theme-button-text-color)
-        // 
+        //
         color: "var(--tg-theme-text-color)",
         "subtitle-color": "var(--tg-theme-subtitle-text-color)",
         foreground: "hsl(var(--foreground))",
@@ -85,12 +84,12 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       fontFamily: {
-        sans: ['var(--font-outfit)'],
-        mono: ['var(--font-beVietnamPro)'],
+        sans: ["var(--font-outfit)"],
+        mono: ["var(--font-beVietnamPro)"],
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;

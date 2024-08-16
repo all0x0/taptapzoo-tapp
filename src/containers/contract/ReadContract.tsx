@@ -43,7 +43,7 @@ export function ReadContract() {
         <div className="text-2xl flex items-center">
           <span>
             Current Balance:{" "}
-            <span className="text-rabble">{formattedBalance} TTZ</span>
+            <span className="text-primary">{formattedBalance} TTZ</span>
           </span>
           <button
             onClick={handleRefresh}
