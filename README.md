@@ -5,6 +5,10 @@
 
 Tap, score, and style: Unlock epic skins in this addictive Telegram crypto game!
 
+## Demo
+
+https://t.me/TapTapZooBot
+
 ## The problem it solves
 
 TapTapZoo Mini Game addresses three significant pain points:
