@@ -104,8 +104,6 @@ export default function SkinSelectionPage() {
         functionName: "transfer",
         args: [treasuryAddress, parseEther("1")],
       });
-
-      handleSkinPurchase();
     } catch (err) {
       console.error("CAKE transfer failed:", err);
       setError("Failed to transfer CAKE");
@@ -114,6 +112,12 @@ export default function SkinSelectionPage() {
       mainBtn.hideLoader();
     }
   };
+
+  useEffect(() => {
+    if (isConfirmed && purchaseStep === "sendingCAKE") {
+      handleSkinPurchase();
+    }
+  }, [isConfirmed, purchaseStep]);
 
   const handleSkinPurchase = async () => {
     if (!selectedSkin || !user?.id) return;
