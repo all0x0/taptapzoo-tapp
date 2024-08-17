@@ -75,17 +75,17 @@ export default function SkinSelectionPage() {
     setPurchaseStep("sendingCAKE");
     try {
       await writeContract({
-        address: "0x3055913c90Fcc1A6CE9a358911721eEb942013A1", // CAKE token address
+        address: "0x3055913c90Fcc1A6CE9a358911721eEb942013A1",
         abi: tokenAbi,
         functionName: "transfer",
-        args: [treasuryAddress, parseEther("1")], // Send 1 CAKE
+        args: [treasuryAddress, parseEther("1")],
       });
-      // Wait for confirmation is handled by useWaitForTransactionReceipt hook
     } catch (err) {
       console.error("CAKE transfer failed:", err);
       setError("Failed to transfer CAKE");
       setPurchaseStep("idle");
       setIsPurchasing(false);
+      mainBtn.hideLoader();
     }
   };
 
@@ -98,6 +98,7 @@ export default function SkinSelectionPage() {
       await fetchMarketplaceData();
       setPurchaseStep("idle");
       setIsPurchasing(false);
+      mainBtn.hideLoader();
 
       if (!popup.isOpened) {
         popup.open({
@@ -108,9 +109,10 @@ export default function SkinSelectionPage() {
       }
     } catch (err) {
       console.error("Skin purchase failed:", err);
-      setError("Failed to purchase skin");
+      // setError("Failed to purchase skin");
       setPurchaseStep("idle");
       setIsPurchasing(false);
+      mainBtn.hideLoader();
     }
   };
 
@@ -134,13 +136,17 @@ export default function SkinSelectionPage() {
     }
 
     mainBtn.on("click", async () => {
-      if (isPurchasing) return;
+      if (isPurchasing) {
+        console.log("Purchase already in progress");
+        return;
+      }
       setIsPurchasing(true);
       mainBtn.showLoader();
 
       if (!user?.id) {
         setError("User ID is required");
         setIsPurchasing(false);
+        mainBtn.hideLoader();
         return;
       }
 
