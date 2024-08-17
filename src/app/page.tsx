@@ -194,7 +194,7 @@ const Home = () => {
   }, [user]);
 
   return (
-    <AppRoot className="h-screen font-sans flex flex-col mx-3 my-4">
+    <AppRoot className="font-sans flex flex-col mx-3">
       <Card className="rounded-lg p-2 mb-2">
         <div className="flex justify-between items-center p-2">
           <div className="flex w-full justify-between items-center">

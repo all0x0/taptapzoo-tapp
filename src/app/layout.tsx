@@ -31,7 +31,10 @@ export default function RootLayout({
   const initialState = cookieToInitialState(config, headers().get("cookie"));
 
   return (
-    <html lang="en" className={`${outfit.variable} ${beVietnamPro.variable}`}>
+    <html
+      lang="en"
+      className={`h-screen ${outfit.variable} ${beVietnamPro.variable}`}
+    >
       <head>
         <meta
           name="viewport"
