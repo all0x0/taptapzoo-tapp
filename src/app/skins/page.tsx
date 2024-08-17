@@ -41,7 +41,7 @@ export default function SkinSelectionPage() {
   const user = useMemo(() => initData?.user, [initData]);
   const { address } = useAccount();
   // Check CAKE balance
-  const { data: balance } = useReadContract({
+  const { data: balance, refetch } = useReadContract({
     abi: tokenAbi,
     address: "0x3055913c90Fcc1A6CE9a358911721eEb942013A1", // CAKE token address
     functionName: "balanceOf",
@@ -76,10 +76,15 @@ export default function SkinSelectionPage() {
   const handleCAKETransfer = async () => {
     if (!selectedSkin || selectedSkin.currency !== "CAKE" || !address) return;
 
-    const formattedBalance = balance ? Number(formatEther(balance)) : 0;
+    const { data } = await refetch();
+    const formattedBalance = balance ? Number(formatEther(data || balance)) : 0;
 
     if (formattedBalance < 1) {
       if (!popup.isOpened) {
+        setPurchaseStep("idle");
+        setIsPurchasing(false);
+        mainBtn.hideLoader();
+
         popup.open({
           title: "Insufficient Balance",
           message: `You need at least 1 CAKE to purchase this skin. Your current balance is ${formattedBalance.toFixed(
@@ -191,19 +196,6 @@ export default function SkinSelectionPage() {
   return (
     <AppRoot className="flex flex-col gap-2 px-2">
       <Title className="text-3xl font-bold pl-4">Skins</Title>
-      <Button
-        onClick={() => {
-          popup.open({
-            title: "Selected Skin",
-            message: `You have selected: ${JSON.stringify(selectedSkin)}, ${
-              selectedSkin?.currency
-            }`,
-            buttons: [{ type: "cancel" }],
-          });
-        }}
-      >
-        selectedSkin
-      </Button>
       <div className="flex h-[calc(100vh-120px)] justify-between">
         <div className="w-1/2 px-2 flex flex-col items-center h-full">
           {selectedSkin && (
