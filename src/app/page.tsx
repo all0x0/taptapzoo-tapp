@@ -37,11 +37,11 @@ const Home = () => {
   const router = useRouter();
   const mainBtn = useMainButton();
   const [userInfo, setUserInfo] = useState<any>(null);
-  const initData = useInitData();
   const { initDataRaw } = useLaunchParams();
   const [nextClaimAt, setNextClaimAt] = useState("");
   const popUp = usePopup();
   const utils = useUtils();
+  const initData = useInitData();
   const user = useMemo(() => initData?.user, [initData]);
 
   const handleShare = async () => {
@@ -225,7 +225,10 @@ const Home = () => {
             <p className="text-xs">Daily reward</p>
           )}
         </Card>
-        <Card className="p-2 rounded-lg text-center">
+        <Card
+          className="p-2 rounded-lg text-center"
+          onClick={() => router.push("/test2")}
+        >
           <img src="/actions/coins.webp" alt="Earn" className="mx-auto" />
           <p className="text-xs">Earn</p>
         </Card>
