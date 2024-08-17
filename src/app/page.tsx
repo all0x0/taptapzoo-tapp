@@ -15,7 +15,7 @@ import {
   Card,
   Title,
 } from "@telegram-apps/telegram-ui";
-import { ZapIcon } from "lucide-react";
+import { ArrowRightFromLine, TrophyIcon, ZapIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -234,8 +234,10 @@ const Home = () => {
           <p className="text-xs">Share</p>
         </Card>
       </div>
-      <div className="text-center mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <TrophyIcon className="mx-4" />
         <NumberAnimation value={count} />
+        <ArrowRightFromLine className="mx-4" onClick={() => {}} />
       </div>
 
       <div className="flex justify-center items-center relative">
