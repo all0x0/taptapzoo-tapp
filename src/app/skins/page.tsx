@@ -1,9 +1,13 @@
 "use client";
 
+import { treasuryAddress } from "@/constants";
+import { tokenAbi } from "@/constants/abi";
 import { useInitData, useMainButton, usePopup } from "@telegram-apps/sdk-react";
 import { AppRoot, Card, Title } from "@telegram-apps/telegram-ui";
 import { LockIcon } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import { parseEther } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { buySkinAction, fetchMarketplaceAction } from "../actions/skinActions";
 
 interface SkinsData {
@@ -20,10 +24,27 @@ export default function SkinSelectionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
 
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchaseStep, setPurchaseStep] = useState<
+    "idle" | "sendingCAKE" | "buyingSkin"
+  >("idle");
+
   const mainBtn = useMainButton();
   const popup = usePopup();
   const initData = useInitData();
   const user = useMemo(() => initData?.user, [initData]);
+
+  const { writeContract, data: hash } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: purchaseStep === "sendingCAKE" ? hash : undefined,
+    });
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchMarketplaceData();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user?.id) {
@@ -48,6 +69,57 @@ export default function SkinSelectionPage() {
     }
   };
 
+  const handleCAKETransfer = async () => {
+    if (!selectedSkin || selectedSkin.currency !== "CAKE") return;
+
+    setPurchaseStep("sendingCAKE");
+    try {
+      await writeContract({
+        address: "0x3055913c90Fcc1A6CE9a358911721eEb942013A1", // CAKE token address
+        abi: tokenAbi,
+        functionName: "transfer",
+        args: [treasuryAddress, parseEther("1")], // Send 1 CAKE
+      });
+      // Wait for confirmation is handled by useWaitForTransactionReceipt hook
+    } catch (err) {
+      console.error("CAKE transfer failed:", err);
+      setError("Failed to transfer CAKE");
+      setPurchaseStep("idle");
+      setIsPurchasing(false);
+    }
+  };
+
+  const handleSkinPurchase = async () => {
+    if (!selectedSkin || !user?.id) return;
+
+    setPurchaseStep("buyingSkin");
+    try {
+      await buySkinAction(user.id, selectedSkin.name);
+      await fetchMarketplaceData();
+      setPurchaseStep("idle");
+      setIsPurchasing(false);
+
+      if (!popup.isOpened) {
+        popup.open({
+          title: "Success",
+          message: `You've successfully purchased the ${selectedSkin.name} skin!`,
+          buttons: [{ type: "close" }],
+        });
+      }
+    } catch (err) {
+      console.error("Skin purchase failed:", err);
+      setError("Failed to purchase skin");
+      setPurchaseStep("idle");
+      setIsPurchasing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isConfirmed && purchaseStep === "sendingCAKE") {
+      handleSkinPurchase();
+    }
+  }, [isConfirmed, purchaseStep]);
+
   const handleMainBtn = () => {
     if (!selectedSkin) return;
 
@@ -62,41 +134,20 @@ export default function SkinSelectionPage() {
     }
 
     mainBtn.on("click", async () => {
+      if (isPurchasing) return;
+      setIsPurchasing(true);
       mainBtn.showLoader();
 
       if (!user?.id) {
         setError("User ID is required");
+        setIsPurchasing(false);
         return;
       }
 
-      try {
-        selectedSkin.currency === "CAKE";
-
-        await buySkinAction(user.id, selectedSkin.name);
-        await fetchMarketplaceData();
-        mainBtn.hideLoader();
-
-        if (!popup.isOpened) {
-          popup.open({
-            title: "Success",
-            message: `You've successfully purchased the ${selectedSkin.name} skin!`,
-            buttons: [
-              {
-                type: "close",
-              },
-            ],
-          });
-        } else {
-          console.log("Popup is already open");
-        }
-      } catch (err) {
-        console.error("Purchase failed:", err);
-        mainBtn.hideLoader();
-        // popup.open({
-        //   title: "Error",
-        //   message: "Failed to purchase skin. Please try again.",
-        //   buttons: [{ type: "close" }],
-        // });
+      if (selectedSkin.currency === "CAKE") {
+        await handleCAKETransfer();
+      } else {
+        await handleSkinPurchase();
       }
     });
   };
