@@ -4,156 +4,66 @@ import { useMainButton } from "@telegram-apps/sdk-react";
 import { AppRoot, Card, Title } from "@telegram-apps/telegram-ui";
 import { LockIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { buySkinAction, fetchMarketplaceAction } from "../actions/skinActions";
 
-const skins = [
-  {
-    name: "penguin",
-    bio: "Waddle into the spotlight with this charming and tuxedo-clad penguin skin, perfect for formal occasions.",
-    price: 100,
-    currency: "TTZ",
-    locked: false,
-  },
-  {
-    name: "redpanda",
-    bio: "Get cozy with this adorable and laid-back red panda skin, always ready for a nap.",
-    price: 200,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "cat",
-    bio: "Furry and agile, this cat skin is purr-fect for any occasion.",
-    price: 1000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "dog",
-    bio: "Faithful and friendly, this dog skin is the perfect companion for any adventure.",
-    price: 150000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "unicorn",
-    bio: "Add a touch of magic to your wardrobe with this mythical and enchanting unicorn skin.",
-    price: 200000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "sloth",
-    bio: "Hang loose with this chill and relaxed sloth skin, taking it easy in style.",
-    price: 400000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "chimpanzee",
-    bio: "Get ready to swing into action with this intelligent and charming chimpanzee skin.",
-    price: 500000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "giraffe",
-    bio: "Reach new heights with this tall and charming giraffe skin, perfect for standing out.",
-    price: 800000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "kangaroo",
-    bio: "Hop into action with this energetic and playful kangaroo skin, full of Aussie charm.",
-    price: 900000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "meerkat",
-    bio: "Stand watch with this curious and social meerkat skin, always on the lookout for fun.",
-    price: 1100000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "elephant",
-    bio: "Wise and gentle, this elephant skin is a majestic addition to any collection.",
-    price: 1200000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "toucan",
-    bio: "Brighten up your day with this colorful and playful toucan skin, full of tropical flair.",
-    price: 1400000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "zebra",
-    bio: "Stripe up your style with this bold and striking zebra skin, black and white and ready to go.",
-    price: 1600000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "godfather",
-    bio: "Make an offer you can't refuse with this sleek and sophisticated godfather skin.",
-    price: 1800000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "lion",
-    bio: "Roar with pride with this regal and fearless lion skin, the king of the jungle.",
-    price: 2200000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "dino",
-    bio: "Unleash your inner beast with this prehistoric dino skin, roaring with excitement.",
-    price: 2000000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "dragon",
-    bio: "Breathe fire into your wardrobe with this mythical dragon skin, symbolizing power and strength.",
-    price: 2500000,
-    currency: "TTZ",
-    locked: true,
-  },
-  {
-    name: "pancake",
-    bio: "Flipping good fun with this tasty pancake skin, topped with sweetness and a side of syrup.",
-    price: 1,
-    currency: "CAKE",
-    locked: true,
-  },
-];
+interface SkinsData {
+  name: string;
+  bio: string;
+  price: number;
+  currency: string;
+  locked: boolean;
+}
 
 export default function SkinSelectionPage() {
-  const [selectedSkin, setSelectedSkin] = useState(skins[0]);
+  const [skins, setSkins] = useState<SkinsData[]>([]);
+  const [selectedSkin, setSelectedSkin] = useState<SkinsData>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
   const mainBtn = useMainButton();
+
+  useEffect(() => {
+    fetchMarketplaceData();
+  }, []);
+
+  const fetchMarketplaceData = async () => {
+    try {
+      const chatId = 123456; // Replace with actual chat ID
+      const data = await fetchMarketplaceAction(chatId);
+      setSkins(data.skins);
+      setSelectedSkin(data.skins[0]);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch marketplace data");
+      setLoading(false);
+    }
+  };
+
   const handleMainBtn = () => {
+    if (!selectedSkin) return;
+
     mainBtn.enable();
     mainBtn.setText("Purchase");
     mainBtn.setBgColor("#08F7AF");
+
     if (selectedSkin.locked) {
       mainBtn.show();
     } else {
       mainBtn.hide();
     }
 
-    mainBtn.on("click", () => {
+    mainBtn.on("click", async () => {
       mainBtn.showLoader();
-      setTimeout(() => {
-        console.log("Purchase action for", selectedSkin.name);
+      try {
+        const chatId = 123456; // Replace with actual chat ID
+        await buySkinAction(chatId, selectedSkin.name);
+        // Refresh marketplace data after purchase
+        await fetchMarketplaceData();
         mainBtn.hideLoader();
-        // Add purchase logic here
-      }, 2000);
+      } catch (err) {
+        console.error("Purchase failed:", err);
+        mainBtn.hideLoader();
+        // Handle purchase error (e.g., show error message)
+      }
     });
   };
 
@@ -161,28 +71,35 @@ export default function SkinSelectionPage() {
     handleMainBtn();
   }, [selectedSkin]);
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <AppRoot className="flex flex-col gap-2 px-2">
       <Title className="text-3xl font-bold pl-4">Skins</Title>
       <div className="flex h-[calc(100vh-120px)] justify-between">
         <div className="w-1/2 px-2 flex flex-col items-center h-full">
-          <Card className="p-4 w-full">
-            <img
-              alt={selectedSkin.name}
-              src={`/skins/${selectedSkin.name}.webp`}
-              className="rounded object-cover w-full h-full"
-            />
-          </Card>
-          <div className="text-start pt-4 pl-2">
-            <h2 className="text-3xl font-bold mb-2">
-              {selectedSkin.name.charAt(0).toUpperCase() +
-                selectedSkin.name.slice(1)}
-            </h2>
-            <p className="text-lg text-gray-500 mb-4">{selectedSkin.bio}</p>
-            <p className="text-2xl font-bold mb-2">
-              {selectedSkin.price} {selectedSkin.currency}
-            </p>
-          </div>
+          {selectedSkin && (
+            <Card className="p-4 w-full">
+              <img
+                alt={selectedSkin.name}
+                src={`/skins/${selectedSkin.name}.webp`}
+                className="rounded object-cover w-full h-full"
+              />
+            </Card>
+          )}
+          {selectedSkin && (
+            <div className="text-start pt-4 pl-2">
+              <h2 className="text-3xl font-bold mb-2">
+                {selectedSkin.name.charAt(0).toUpperCase() +
+                  selectedSkin.name.slice(1)}
+              </h2>
+              <p className="text-lg text-gray-500 mb-4">{selectedSkin.bio}</p>
+              <p className="text-2xl font-bold mb-2">
+                {selectedSkin.price} {selectedSkin.currency}
+              </p>
+            </div>
+          )}
         </div>
         <div className="w-1/2 overflow-y-auto h-[calc(100vh-120px)]">
           <div className="flex flex-col gap-2 px-2">
