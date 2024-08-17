@@ -69,24 +69,35 @@ export default function SkinSelectionPage() {
         return;
       }
 
-      // try {
-      await buySkinAction(user.id, selectedSkin.name);
-      await fetchMarketplaceData();
-      mainBtn.hideLoader();
-      popup.open({
-        title: "Success",
-        message: `You've successfully purchased the ${selectedSkin.name} skin!`,
-        buttons: [{ type: "close" }],
-      });
-      // } catch (err) {
-      //   console.error("Purchase failed:", err);
-      //   mainBtn.hideLoader();
-      //   popup.open({
-      //     title: "Error",
-      //     message: "Failed to purchase skin. Please try again.",
-      //     buttons: [{ type: "close" }],
-      //   });
-      // }
+      try {
+        selectedSkin.currency === "CAKE";
+
+        await buySkinAction(user.id, selectedSkin.name);
+        await fetchMarketplaceData();
+        mainBtn.hideLoader();
+
+        if (!popup.isOpened) {
+          popup.open({
+            title: "Success",
+            message: `You've successfully purchased the ${selectedSkin.name} skin!`,
+            buttons: [
+              {
+                type: "close",
+              },
+            ],
+          });
+        } else {
+          console.log("Popup is already open");
+        }
+      } catch (err) {
+        console.error("Purchase failed:", err);
+        mainBtn.hideLoader();
+        // popup.open({
+        //   title: "Error",
+        //   message: "Failed to purchase skin. Please try again.",
+        //   buttons: [{ type: "close" }],
+        // });
+      }
     });
   };
 
