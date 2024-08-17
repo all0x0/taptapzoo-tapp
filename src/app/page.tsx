@@ -7,6 +7,7 @@ import {
   useMainButton,
   usePopup,
   useUtils,
+  useViewport,
 } from "@telegram-apps/sdk-react";
 import {
   AppRoot,
@@ -146,7 +147,7 @@ const Home = () => {
       }
     };
 
-    const intervalId = setInterval(updatePoints, 5000);
+    const intervalId = setInterval(updatePoints, 3000);
 
     return () => clearInterval(intervalId);
   }, [user, count, energy]);
@@ -195,7 +196,7 @@ const Home = () => {
   return (
     <AppRoot className="h-screen font-sans flex flex-col mx-3 my-4">
       <Card className="rounded-lg p-2 mb-2">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center p-2">
           <div className="flex w-full justify-between items-center">
             <div className="flex flex-row gap-2">
               <img
@@ -230,7 +231,7 @@ const Home = () => {
           <img
             src="/actions/calendar.webp"
             alt="Daily reward"
-            className="mx-auto"
+            className="mx-auto w-16 h-16"
           />
           {nextClaimAt && new Date(nextClaimAt) > new Date() ? (
             <p className="text-xs">
@@ -247,13 +248,21 @@ const Home = () => {
         </Card>
         <Card
           className="p-2 rounded-lg text-center"
-          onClick={() => router.push("/test2")}
+          // onClick={() => router.push("/test2")}
         >
-          <img src="/actions/coins.webp" alt="Earn" className="mx-auto" />
+          <img
+            src="/actions/coins.webp"
+            alt="Earn"
+            className="mx-auto w-16 h-16"
+          />
           <p className="text-xs">Earn</p>
         </Card>
         <Card className="p-2 rounded-lg text-center" onClick={handleShare}>
-          <img src="/actions/announce.webp" alt="Share" className="mx-auto" />
+          <img
+            src="/actions/announce.webp"
+            alt="Share"
+            className="mx-auto w-16 h-16"
+          />
           <p className="text-xs">Share</p>
         </Card>
       </div>
