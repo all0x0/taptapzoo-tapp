@@ -1,5 +1,4 @@
 "use client";
-import { BottomBar } from "@/components/shared/Bottombar";
 import Navbar from "@/components/shared/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import {
