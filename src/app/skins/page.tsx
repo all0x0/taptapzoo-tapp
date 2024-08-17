@@ -1,9 +1,9 @@
 "use client";
 
-import { useMainButton } from "@telegram-apps/sdk-react";
+import { useInitData, useMainButton, usePopup } from "@telegram-apps/sdk-react";
 import { AppRoot, Card, Title } from "@telegram-apps/telegram-ui";
 import { LockIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { buySkinAction, fetchMarketplaceAction } from "../actions/skinActions";
 
 interface SkinsData {
@@ -19,18 +19,28 @@ export default function SkinSelectionPage() {
   const [selectedSkin, setSelectedSkin] = useState<SkinsData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+
   const mainBtn = useMainButton();
+  const popup = usePopup();
+  const initData = useInitData();
+  const user = useMemo(() => initData?.user, [initData]);
 
   useEffect(() => {
-    fetchMarketplaceData();
-  }, []);
+    if (user?.id) {
+      fetchMarketplaceData();
+    }
+  }, [user]);
 
   const fetchMarketplaceData = async () => {
+    if (!user?.id) {
+      setError("User ID is required");
+      return;
+    }
+
     try {
-      const chatId = 123456; // Replace with actual chat ID
-      const data = await fetchMarketplaceAction(chatId);
-      setSkins(data.skins);
-      setSelectedSkin(data.skins[0]);
+      const skins = await fetchMarketplaceAction(user.id);
+      setSkins(skins);
+      setSelectedSkin(skins[0]);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch marketplace data");
@@ -53,17 +63,30 @@ export default function SkinSelectionPage() {
 
     mainBtn.on("click", async () => {
       mainBtn.showLoader();
-      try {
-        const chatId = 123456; // Replace with actual chat ID
-        await buySkinAction(chatId, selectedSkin.name);
-        // Refresh marketplace data after purchase
-        await fetchMarketplaceData();
-        mainBtn.hideLoader();
-      } catch (err) {
-        console.error("Purchase failed:", err);
-        mainBtn.hideLoader();
-        // Handle purchase error (e.g., show error message)
+
+      if (!user?.id) {
+        setError("User ID is required");
+        return;
       }
+
+      // try {
+      await buySkinAction(user.id, selectedSkin.name);
+      await fetchMarketplaceData();
+      mainBtn.hideLoader();
+      popup.open({
+        title: "Success",
+        message: `You've successfully purchased the ${selectedSkin.name} skin!`,
+        buttons: [{ type: "close" }],
+      });
+      // } catch (err) {
+      //   console.error("Purchase failed:", err);
+      //   mainBtn.hideLoader();
+      //   popup.open({
+      //     title: "Error",
+      //     message: "Failed to purchase skin. Please try again.",
+      //     buttons: [{ type: "close" }],
+      //   });
+      // }
     });
   };
 
@@ -71,7 +94,8 @@ export default function SkinSelectionPage() {
     handleMainBtn();
   }, [selectedSkin]);
 
-  if (loading) return <div>Loading...</div>;
+  if (!user?.id) return <div>Loading user data...</div>;
+  if (loading) return <div>Loading marketplace data...</div>;
   if (error) return <div>{error}</div>;
 
   return (
