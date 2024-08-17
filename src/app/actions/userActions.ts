@@ -53,3 +53,33 @@ export async function setPoints(
   revalidatePath("/");
   return data;
 }
+
+// Function to get active skin for a user
+export async function getActiveSkin(chatId: number) {
+  const response = await fetch(`${process.env.API_URL}/active-skin/${chatId}`);
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error);
+  }
+  return data.activeSkin;
+}
+
+// Function to set active skin for a user
+export async function setActiveSkin(chatId: number, skinName: string) {
+  const response = await fetch(
+    `${process.env.API_URL}/set-active-skin/${chatId}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skinName }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to set active skin");
+  }
+
+  // revalidatePath("/");
+  return response.json();
+}

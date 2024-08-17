@@ -15,12 +15,14 @@ import {
   Card,
   Title,
 } from "@telegram-apps/telegram-ui";
-import { ArrowRightFromLine, TrophyIcon, ZapIcon } from "lucide-react";
+import { ArrowRightFromLine, LucideDog, ZapIcon } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   addOrUpdateUser,
   claimDailyReward,
+  getActiveSkin,
   getUserInfo,
   setPoints,
 } from "./actions/userActions";
@@ -43,6 +45,7 @@ const Home = () => {
   const utils = useUtils();
   const initData = useInitData();
   const user = useMemo(() => initData?.user, [initData]);
+  const [activeSkin, setActiveSkin] = useState<string>();
 
   const handleShare = async () => {
     utils.shareURL(
@@ -172,6 +175,23 @@ const Home = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchActiveSkin = async () => {
+      if (user) {
+        try {
+          const skin = await getActiveSkin(user.id);
+          setActiveSkin(skin);
+        } catch (error) {
+          console.error("Error fetching active skin:", error);
+          // Optionally set a default skin if there's an error
+          setActiveSkin("penguin");
+        }
+      }
+    };
+
+    fetchActiveSkin();
+  }, [user]);
+
   return (
     <AppRoot className="h-screen font-sans flex flex-col mx-3 my-4">
       <Card className="rounded-lg p-2 mb-2">
@@ -238,7 +258,7 @@ const Home = () => {
         </Card>
       </div>
       <div className="flex justify-between items-center mb-4">
-        <TrophyIcon className="mx-4" />
+        <LucideDog className="mx-4" onClick={() => {}} />
         <NumberAnimation value={count} />
         <ArrowRightFromLine className="mx-4" onClick={() => {}} />
       </div>
@@ -249,11 +269,21 @@ const Home = () => {
             onClick={handleClick}
             className="rounded-full p-1 w-48 h-48 transform transition-transform duration-150 hover:scale-105 active:scale-95 cursor-pointer"
           >
-            <img
-              src="skins/penguin.webp"
-              alt="clicker"
-              className="rounded-full w-full h-full object-cover"
-            />
+            {activeSkin ? (
+              <img
+                src={`skins/${activeSkin}.webp`}
+                alt="Active Skin"
+                className="rounded-full w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={"/loader.svg"}
+                alt="loader"
+                width={24}
+                height={24}
+                className="animate-spin rounded-full w-full h-full object-cover"
+              />
+            )}
             <div className="absolute -top-8 left-0 flex justify-center items-center w-full h-full">
               <TextUp animationTrigger={animationTrigger} points={multiplier} />
             </div>

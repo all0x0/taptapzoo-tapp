@@ -87,7 +87,7 @@ export function TelegramProvider(props: PropsWithChildren) {
           alt="loader"
           width={24}
           height={24}
-          className=" animate-spin"
+          className="animate-spin"
         />
       </div>
     </div>

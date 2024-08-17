@@ -3,12 +3,18 @@
 import { treasuryAddress } from "@/constants";
 import { tokenAbi } from "@/constants/abi";
 import { useInitData, useMainButton, usePopup } from "@telegram-apps/sdk-react";
-import { AppRoot, Card, Title } from "@telegram-apps/telegram-ui";
+import { AppRoot, Button, Card, Title } from "@telegram-apps/telegram-ui";
 import { LockIcon } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { parseEther } from "viem";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { formatEther, parseEther } from "viem";
+import {
+  useAccount,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { buySkinAction, fetchMarketplaceAction } from "../actions/skinActions";
+import { setActiveSkin } from "../actions/userActions";
 
 interface SkinsData {
   name: string;
@@ -33,7 +39,14 @@ export default function SkinSelectionPage() {
   const popup = usePopup();
   const initData = useInitData();
   const user = useMemo(() => initData?.user, [initData]);
-
+  const { address } = useAccount();
+  // Check CAKE balance
+  const { data: balance } = useReadContract({
+    abi: tokenAbi,
+    address: "0x3055913c90Fcc1A6CE9a358911721eEb942013A1", // CAKE token address
+    functionName: "balanceOf",
+    args: [address as `0x${string}`],
+  });
   const { writeContract, data: hash } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -70,7 +83,22 @@ export default function SkinSelectionPage() {
   };
 
   const handleCAKETransfer = async () => {
-    if (!selectedSkin || selectedSkin.currency !== "CAKE") return;
+    if (!selectedSkin || selectedSkin.currency !== "CAKE" || !address) return;
+
+    const formattedBalance = balance ? Number(formatEther(balance)) : 0;
+
+    if (formattedBalance < 1) {
+      if (!popup.isOpened) {
+        popup.open({
+          title: "Insufficient Balance",
+          message: `You need at least 1 CAKE to purchase this skin. Your current balance is ${formattedBalance.toFixed(
+            2
+          )} CAKE.`,
+          buttons: [{ type: "close" }],
+        });
+      }
+      return;
+    }
 
     setPurchaseStep("sendingCAKE");
     try {
@@ -230,16 +258,36 @@ export default function SkinSelectionPage() {
                       <LockIcon size={48} />
                     </div>
                   )}
-                  <Card.Cell
-                    readOnly
-                    subtitle={
-                      skin.locked
-                        ? skin.price + " " + skin.currency
-                        : "Unlocked"
-                    }
-                  >
-                    {skin.locked ? skin.bio : skin.bio}
-                  </Card.Cell>
+
+                  {skin.locked ? (
+                    <Card.Cell
+                      className="w-full"
+                      readOnly
+                      subtitle={
+                        skin.locked ? skin.price + " " + skin.currency : ""
+                      }
+                    >
+                      {skin.bio}
+                    </Card.Cell>
+                  ) : (
+                    <Button
+                      className="w-full"
+                      stretched
+                      onClick={async () => {
+                        await setActiveSkin(user.id, skin.name);
+
+                        if (!popup.isOpened) {
+                          popup.open({
+                            title: "Using the " + skin.name + " Skin",
+                            message: `You are now using the ${skin.name} skin.`,
+                            buttons: [{ type: "close" }],
+                          });
+                        }
+                      }}
+                    >
+                      Use
+                    </Button>
+                  )}
                 </React.Fragment>
               </Card>
             ))}
