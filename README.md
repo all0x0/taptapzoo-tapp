@@ -1,6 +1,7 @@
-# TapTapZoo Mini Game
 
-## Tagline
+![Banner](https://github.com/user-attachments/assets/c5f0684c-ae59-4d7d-8204-aad9130ce3d1)
+
+# TapTapZoo Mini Game
 
 Tap, score, and style: Unlock epic skins in this addictive Telegram crypto game!
 
@@ -18,7 +19,7 @@ TapTapZoo Mini Game addresses three significant pain points:
 
 During the development of TapTapZoo Mini Game, we encountered several challenges:
 
-1. **Cross-Platform Compatibility**: Wallet and social login functions that worked on the web didn't perform consistently inside Telegram. After testing various methods, we found that email login worked universally, while wallet login only functioned in the Telegram desktop app. We ultimately had to use the Telegram Web App to ensure all features worked across platforms.
+1. **Cross-Platform Compatibility**: Wallet and social login functions that worked on the web didn't perform consistently inside Telegram, while wallet login only functioned in the Telegram desktop app. After testing various methods, we found that email login worked universally.
 
 2. **Token Integration**: Initially, we wanted to use a custom token for in-game asset purchases, aiming for seamless integration with 1inch. Despite pairing it on Uniswap, we faced persistent "no liquidity" issues on 1inch. We learned that 1inch requires at least $10,000 USD equivalent value for connector assets like USDC or ETH. Lacking this amount, we pivoted to using mock partner tokens like PancakeSwap for exclusive skin purchases.
 
