@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "A fun mini game where you can tap and collect rewards",
 };
 
+export const fetchCache = "force-no-store";
+
 export default function RootLayout({
   children,
 }: {

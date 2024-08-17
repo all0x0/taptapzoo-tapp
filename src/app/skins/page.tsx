@@ -53,18 +53,6 @@ export default function SkinSelectionPage() {
       hash: purchaseStep === "sendingCAKE" ? hash : undefined,
     });
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchMarketplaceData();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchMarketplaceData();
-    }
-  }, [user]);
-
   const fetchMarketplaceData = async () => {
     if (!user?.id) {
       setError("User ID is required");
@@ -81,6 +69,9 @@ export default function SkinSelectionPage() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchMarketplaceData();
+  }, []);
 
   const handleCAKETransfer = async () => {
     if (!selectedSkin || selectedSkin.currency !== "CAKE" || !address) return;
@@ -102,12 +93,14 @@ export default function SkinSelectionPage() {
 
     setPurchaseStep("sendingCAKE");
     try {
-      await writeContract({
+      writeContract({
         address: "0x3055913c90Fcc1A6CE9a358911721eEb942013A1",
         abi: tokenAbi,
         functionName: "transfer",
         args: [treasuryAddress, parseEther("1")],
       });
+
+      handleSkinPurchase();
     } catch (err) {
       console.error("CAKE transfer failed:", err);
       setError("Failed to transfer CAKE");
@@ -144,12 +137,6 @@ export default function SkinSelectionPage() {
     }
   };
 
-  useEffect(() => {
-    if (isConfirmed && purchaseStep === "sendingCAKE") {
-      handleSkinPurchase();
-    }
-  }, [isConfirmed, purchaseStep]);
-
   const handleMainBtn = () => {
     if (!selectedSkin) return;
 
@@ -162,12 +149,17 @@ export default function SkinSelectionPage() {
     } else {
       mainBtn.hide();
     }
+  };
 
-    mainBtn.on("click", async () => {
+  useEffect(() => {
+    handleMainBtn();
+
+    const handlePurchase = async () => {
       if (isPurchasing) {
         console.log("Purchase already in progress");
         return;
       }
+
       setIsPurchasing(true);
       mainBtn.showLoader();
 
@@ -178,17 +170,19 @@ export default function SkinSelectionPage() {
         return;
       }
 
-      if (selectedSkin.currency === "CAKE") {
+      if (selectedSkin && selectedSkin.currency === "CAKE") {
         await handleCAKETransfer();
       } else {
         await handleSkinPurchase();
       }
-    });
-  };
+    };
 
-  useEffect(() => {
-    handleMainBtn();
-  }, [selectedSkin]);
+    const removeListener = mainBtn.on("click", handlePurchase, true);
+
+    return () => {
+      removeListener();
+    };
+  }, [selectedSkin, user?.id, isPurchasing]);
 
   if (!user?.id) return <div>Loading user data...</div>;
   if (loading) return <div>Loading marketplace data...</div>;
@@ -197,6 +191,19 @@ export default function SkinSelectionPage() {
   return (
     <AppRoot className="flex flex-col gap-2 px-2">
       <Title className="text-3xl font-bold pl-4">Skins</Title>
+      <Button
+        onClick={() => {
+          popup.open({
+            title: "Selected Skin",
+            message: `You have selected: ${JSON.stringify(selectedSkin)}, ${
+              selectedSkin?.currency
+            }`,
+            buttons: [{ type: "cancel" }],
+          });
+        }}
+      >
+        selectedSkin
+      </Button>
       <div className="flex h-[calc(100vh-120px)] justify-between">
         <div className="w-1/2 px-2 flex flex-col items-center h-full">
           {selectedSkin && (
